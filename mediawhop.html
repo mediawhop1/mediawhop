@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mediawhop — End-to-End Google Ads Management</title>
+<meta name="description" content="Expert hands-on Google Ads management. Insider knowledge, full transparency, human partnership — not vanity metrics.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%230A0F1C%22/><text x=%2250%22 y=%2270%22 font-size=%2264%22 fill=%22%234285F4%22 text-anchor=%22middle%22 font-family=%22Arial,sans-serif%22 font-weight=%22800%22>m</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0A0F1C;
+    --bg-1:#0D1424;
+    --bg-2:#111A2E;
+    --surface:rgba(255,255,255,0.035);
+    --surface-strong:rgba(255,255,255,0.06);
+    --border:rgba(255,255,255,0.09);
+    --border-soft:rgba(255,255,255,0.06);
+    --text:#EAF0FB;
+    --text-soft:#96A2BC;
+    --text-faint:#5E6A85;
+    --blue:#4285F4;
+    --blue-soft:rgba(66,133,244,0.16);
+    --green:#34A853;
+    --green-soft:rgba(52,168,83,0.16);
+    --waste:#FF6B57;
+    --waste-soft:rgba(255,107,87,0.14);
+    --display:'Poppins', sans-serif;
+    --mono:'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    --maxw:1140px;
+    --ease:cubic-bezier(.19,1,.22,1);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 78% -8%, #16213B 0%, transparent 60%),
+      radial-gradient(ellipse 700px 500px at -5% 20%, #131D33 0%, transparent 55%),
+      var(--bg-0);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:var(--display);
+    font-weight:400;
+    font-size:1.02rem;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  a{color:inherit;}
+  img,svg,canvas{display:block;max-width:100%;}
+
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px; position:relative; z-index:2;}
+
+  ::selection{ background:var(--blue); color:#fff; }
+
+  /* ---------- scroll progress ---------- */
+  #progress{
+    position:fixed; top:0; left:0; height:2.5px; width:0%;
+    background:linear-gradient(90deg, var(--blue), var(--green));
+    z-index:200; transition:width 0.1s linear;
+  }
+
+  /* ---------- reveal ---------- */
+  .reveal{ opacity:0; transform:translateY(22px); transition:opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+  .reveal.in-view{ opacity:1; transform:translateY(0); }
+
+  /* ---------- typography ---------- */
+  .label{ font-family:var(--mono); font-size:0.72rem; letter-spacing:0.02em; color:var(--text-soft); }
+  h1,h2,h3{ font-family:var(--display); font-weight:700; margin:0; letter-spacing:-0.01em; color:var(--text); }
+
+  /* ---------- logo ---------- */
+  .logo{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:1.55rem;
+    text-decoration:none;
+    letter-spacing:-0.01em;
+    display:inline-flex;
+    position:relative;
+  }
+  .logo .lm{ color:var(--blue); }
+  .logo .lw{
+    background:linear-gradient(100deg, var(--green) 0%, #5FD489 50%, var(--green) 100%);
+    background-size:220% auto;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:shimmer 6s linear infinite;
+  }
+  @keyframes shimmer{ to{ background-position:-220% center; } }
+
+  /* ---------- nav ---------- */
+  header.site{
+    position:sticky; top:0; z-index:100;
+    background:rgba(10,15,28,0.72);
+    backdrop-filter:saturate(160%) blur(14px);
+    border-bottom:1px solid var(--border-soft);
+  }
+  .nav-row{ display:flex; align-items:center; justify-content:space-between; padding:16px 28px; max-width:var(--maxw); margin:0 auto; }
+  nav.links{ display:flex; gap:30px; align-items:center; font-family:var(--mono); font-size:0.76rem; }
+  nav.links a{
+    text-decoration:none; color:var(--text-soft);
+    position:relative; padding-bottom:3px;
+    transition:color 0.2s ease;
+  }
+  nav.links a::after{
+    content:""; position:absolute; left:0; bottom:0; height:1px; width:0%;
+    background:linear-gradient(90deg,var(--blue),var(--green));
+    transition:width 0.25s var(--ease);
+  }
+  nav.links a:hover, nav.links a.active{ color:var(--text); }
+  nav.links a:hover::after, nav.links a.active::after{ width:100%; }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:0.8rem;
+    padding:12px 20px;
+    text-decoration:none;
+    border:1px solid var(--border);
+    cursor:pointer;
+    background:var(--surface);
+    color:var(--text);
+    border-radius:8px;
+    position:relative; overflow:hidden;
+    isolation:isolate;
+    transition:border-color 0.25s ease, transform 0.2s ease, background 0.25s ease;
+  }
+  .btn:hover{ transform:translateY(-2px); border-color:rgba(255,255,255,0.22); }
+  .btn:active{ transform:translateY(0); }
+  .btn-solid{ background:linear-gradient(120deg, var(--blue), #3f7be0); border-color:transparent; color:#fff; }
+  .btn-solid:hover{ box-shadow:0 8px 28px -8px var(--blue-soft), 0 0 0 1px rgba(66,133,244,0.35); }
+  .btn-ghost:hover{ background:var(--surface-strong); }
+  .btn-glow::before{
+    content:""; position:absolute; inset:0; z-index:-1;
+    background:radial-gradient(180px circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.16), transparent 60%);
+    opacity:0; transition:opacity 0.25s ease;
+  }
+  .btn-glow:hover::before{ opacity:1; }
+
+  .nav-cta{ padding:10px 18px; font-size:0.78rem; }
+  .menu-btn{ display:none; }
+  @media (max-width: 860px){
+    nav.links{ display:none; }
+    .menu-btn{ display:inline-flex; border:1px solid var(--border); background:var(--surface); border-radius:8px; font-family:var(--mono); font-size:0.75rem; padding:9px 12px; color:var(--text); }
+  }
+
+  /* ---------- hero ---------- */
+  .hero{ position:relative; padding:64px 0 90px; overflow:hidden; }
+  #particles{ position:absolute; inset:0; width:100%; height:100%; z-index:0; opacity:0.85; pointer-events:none; }
+  .hero-grid{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:start; position:relative; z-index:2; }
+  @media (max-width: 900px){ .hero-grid{ grid-template-columns:1fr; } }
+  @media (min-width: 901px){ .hero-grid > div:last-child{ margin-top:42px; } }
+
+  .hero-badge{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:0.72rem; color:var(--text-soft);
+    border:1px solid var(--border); background:var(--surface);
+    padding:7px 13px; border-radius:100px; margin-bottom:26px;
+  }
+  .hero-badge .dot{ width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); }
+
+  .hero h1{
+    font-size:clamp(2.2rem, 4vw + 1rem, 3.5rem);
+    line-height:1.12;
+    max-width:15ch;
+    opacity:0; transform:translateY(18px);
+    animation:heroIn 0.9s var(--ease) 0.15s forwards;
+  }
+  .hero p.sub{
+    margin-top:22px; max-width:44ch; color:var(--text-soft); font-size:1.08rem;
+    opacity:0; transform:translateY(18px);
+    animation:heroIn 0.9s var(--ease) 0.32s forwards;
+  }
+  .hero-ctas{
+    margin-top:32px; display:flex; gap:14px; flex-wrap:wrap;
+    opacity:0; transform:translateY(18px);
+    animation:heroIn 0.9s var(--ease) 0.48s forwards;
+  }
+  .hero-tagline{
+    margin-top:46px; font-family:var(--mono); font-size:0.76rem; color:var(--text-faint);
+    opacity:0; animation:fadeIn 1s var(--ease) 0.7s forwards;
+  }
+  @keyframes heroIn{ to{ opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn{ to{ opacity:1; } }
+
+  /* ---------- receipt / calculator card ---------- */
+  .receipt{
+    position:relative; z-index:2;
+    background:linear-gradient(180deg, var(--surface-strong), var(--surface));
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:28px 26px 24px;
+    backdrop-filter:blur(6px);
+    box-shadow:0 30px 60px -30px rgba(0,0,0,0.6);
+    opacity:0; transform:translateY(24px) rotate(0.6deg);
+    animation:settle 0.9s var(--ease) 0.4s forwards;
+  }
+  @keyframes settle{ to{ opacity:1; transform:translateY(0) rotate(0deg); } }
+  .receipt-head{ display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px dashed var(--border); padding-bottom:14px; margin-bottom:16px; }
+  .receipt-row{ display:flex; justify-content:space-between; align-items:center; padding:13px 0; border-bottom:1px solid var(--border-soft); font-family:var(--mono); font-size:0.92rem; gap:12px; }
+  .receipt-row:last-of-type{ border-bottom:none; }
+  .receipt-row .r-label{ color:var(--text-soft); font-size:0.82rem; }
+  .receipt-row .r-value{ font-variant-numeric:tabular-nums; font-weight:600; }
+  .receipt-row.waste .r-value{ color:var(--waste); text-shadow:0 0 18px var(--waste-soft); }
+  .receipt-row.recovered .r-value{ color:var(--green); text-shadow:0 0 18px var(--green-soft); }
+
+  .spend-input-row{ display:flex; align-items:center; gap:10px; }
+  .spend-input-row input[type="range"]{ width:100%; accent-color:var(--blue); }
+  .spend-edit{ display:flex; align-items:center; gap:4px; font-family:var(--mono); font-weight:600; font-variant-numeric:tabular-nums; }
+  .spend-edit input[type="number"]{
+    width:100px; font-family:var(--mono); font-size:0.92rem; font-weight:600; line-height:1;
+    border:none; border-bottom:1px solid var(--border); background:transparent; color:var(--text); padding:3px 0 2px;
+    text-align:right;
+  }
+  .spend-edit input[type="number"]:focus{ outline:none; border-bottom:2px solid var(--blue); }
+  .receipt-foot{ margin-top:16px; font-family:var(--mono); font-size:0.7rem; color:var(--text-faint); line-height:1.5; }
+
+  /* ---------- sections ---------- */
+  section{ padding:84px 0; border-top:1px solid var(--border-soft); position:relative; }
+  .section-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:24px; margin-bottom:46px; flex-wrap:wrap; }
+  .section-head h2{ font-size:clamp(1.7rem, 2.2vw + 1rem, 2.3rem); max-width:17ch; }
+  .section-head .desc{ max-width:40ch; color:var(--text-soft); font-size:1rem; }
+
+  /* ---------- problems ledger ---------- */
+  .ledger{ border-top:1px solid var(--border); }
+  .ledger-row{
+    display:grid; grid-template-columns:110px 1fr 200px; gap:22px; align-items:start;
+    padding:26px 4px; border-bottom:1px solid var(--border-soft);
+    border-radius:10px; transition:background 0.3s ease;
+  }
+  .ledger-row:hover{ background:rgba(255,255,255,0.02); }
+  @media (max-width: 760px){ .ledger-row{ grid-template-columns:1fr; gap:10px; } }
+  .stamp{
+    font-family:var(--mono); font-size:0.72rem; letter-spacing:0.03em; color:var(--waste);
+    border:1px solid var(--waste); display:inline-block; padding:5px 9px;
+    transform:rotate(-3deg); white-space:nowrap; width:fit-content; border-radius:5px;
+    box-shadow:0 0 0 0 transparent; transition:box-shadow 0.3s ease;
+  }
+  .ledger-row:hover .stamp{ box-shadow:0 0 16px var(--waste-soft); }
+  .ledger-row h3{ font-size:1.15rem; font-weight:600; margin-bottom:6px; }
+  .ledger-row p{ margin:0; color:var(--text-soft); font-size:0.97rem; }
+  .ledger-stat{ font-family:var(--mono); font-size:0.85rem; color:var(--text-faint); text-align:right; }
+  @media (max-width: 760px){ .ledger-stat{ text-align:left; } }
+
+  /* ---------- pillars ---------- */
+  .pillars{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  @media (max-width: 760px){ .pillars{ grid-template-columns:1fr; } }
+  .pillar{
+    position:relative; overflow:hidden;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:32px 26px; transition:border-color 0.3s ease, transform 0.3s ease, background 0.3s ease;
+  }
+  .pillar::before{ content:""; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--blue),var(--green)); opacity:0.3; transition:opacity 0.3s ease; }
+  .pillar:hover{ border-color:rgba(255,255,255,0.2); transform:translateY(-4px); background:var(--surface-strong); }
+  .pillar:hover::before{ opacity:1; }
+  .pillar .icon{ width:34px; height:34px; margin-bottom:20px; }
+  .pillar h3{ font-size:1.15rem; margin-bottom:12px; }
+  .pillar p{ color:var(--text-soft); font-size:0.96rem; margin:0; }
+
+  /* ---------- how we work ---------- */
+  .work-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media (max-width: 760px){ .work-grid{ grid-template-columns:1fr; } }
+  .work-card{ position:relative; overflow:hidden; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:34px 30px; transition:border-color 0.3s ease, background 0.3s ease; }
+  .work-card::before{ content:""; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--blue),var(--green)); opacity:0.3; transition:opacity 0.3s ease; }
+  .work-card:hover{ border-color:rgba(255,255,255,0.2); background:var(--surface-strong); }
+  .work-card:hover::before{ opacity:1; }
+  .work-card .icon{ width:32px; height:32px; margin-bottom:18px; }
+  .work-card h3{ font-size:1.2rem; margin-bottom:14px; }
+  .work-card h3.blue{ color:var(--blue); }
+  .work-card h3.green{ color:var(--green); }
+  .work-card p{ color:var(--text-soft); margin:0 0 14px; }
+  .work-card p:last-child{ margin-bottom:0; }
+
+  /* ---------- process ---------- */
+  .process{ display:grid; grid-template-columns:repeat(4,1fr); gap:0; position:relative; padding-top:8px; }
+  @media (max-width: 900px){ .process{ grid-template-columns:1fr; } }
+  .process-line{ position:absolute; top:26px; left:0; right:0; height:1px; background:var(--border); overflow:hidden; }
+  .process-line-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--blue), var(--green)); transition:width 1.4s var(--ease); }
+  @media (max-width: 900px){ .process-line{ display:none; } }
+  .step{ padding:0 22px 0 0; position:relative; }
+  @media (max-width: 900px){ .step{ padding:0 0 34px 26px; border-left:1px solid var(--border); } }
+  .step .num{
+    font-family:var(--mono); font-size:0.95rem; color:var(--text);
+    width:36px; height:36px; border-radius:50%; border:1px solid var(--border);
+    background:var(--bg-1); display:flex; align-items:center; justify-content:center;
+    position:relative; z-index:2; margin-bottom:20px;
+  }
+  @media (max-width: 900px){ .step .num{ margin-left:-44px; } }
+  .step h3{ font-size:1.1rem; margin-bottom:10px; }
+  .step p{ color:var(--text-soft); font-size:0.95rem; margin:0; max-width:26ch; }
+
+  /* ---------- what you get ---------- */
+  .get-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:26px 36px; }
+  @media (max-width: 900px){ .get-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width: 560px){ .get-grid{ grid-template-columns:1fr; } }
+  .get-item{ display:flex; gap:14px; }
+  .get-item .check{
+    flex:none; width:24px; height:24px; border-radius:7px;
+    border:1px solid var(--green); color:var(--green);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-size:0.8rem; margin-top:3px;
+    box-shadow:0 0 0 0 transparent; transition:box-shadow 0.3s ease;
+  }
+  .get-item:hover .check{ box-shadow:0 0 14px var(--green-soft); }
+  .get-item h3{ font-size:1.02rem; margin-bottom:6px; }
+  .get-item p{ margin:0; color:var(--text-soft); font-size:0.92rem; }
+
+  /* ---------- beyond ---------- */
+  .beyond-band{ background:linear-gradient(180deg, var(--bg-1), var(--bg-2)); }
+  .beyond-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-top:40px; }
+  @media (max-width: 760px){ .beyond-grid{ grid-template-columns:1fr; } }
+  .beyond-item{ position:relative; overflow:hidden; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:30px 26px; transition:transform 0.3s ease, border-color 0.3s ease; }
+  .beyond-item::before{ content:""; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--blue),var(--green)); opacity:0.3; transition:opacity 0.3s ease; }
+  .beyond-item:hover{ transform:translateY(-4px); border-color:rgba(255,255,255,0.2); }
+  .beyond-item:hover::before{ opacity:1; }
+  .beyond-item .icon{ width:28px; height:28px; margin-bottom:16px; }
+  .beyond-item h3{ font-size:1.06rem; margin-bottom:10px; }
+  .beyond-item p{ margin:0; color:var(--text-soft); font-size:0.94rem; }
+
+  /* ---------- final cta ---------- */
+  .final{ text-align:left; padding:100px 0 88px; position:relative; overflow:hidden; }
+  .final-glow{ position:absolute; inset:-20% -10%; background:radial-gradient(ellipse 600px 300px at 20% 30%, var(--blue-soft), transparent 60%), radial-gradient(ellipse 600px 300px at 80% 70%, var(--green-soft), transparent 60%); pointer-events:none; z-index:0; animation:drift 14s ease-in-out infinite alternate; }
+  @keyframes drift{ to{ transform:translate(20px,-14px) scale(1.05); } }
+  .final h2{ font-size:clamp(2rem, 4vw + 0.5rem, 3.1rem); max-width:18ch; margin-bottom:22px; position:relative; z-index:1; }
+  .final p{ color:var(--text-soft); max-width:48ch; margin-bottom:34px; font-size:1.08rem; position:relative; z-index:1; }
+  .final-ctas{ display:flex; gap:14px; flex-wrap:wrap; position:relative; z-index:1; }
+
+  footer{ border-top:1px solid var(--border-soft); padding:30px 0; font-family:var(--mono); font-size:0.78rem; color:var(--text-faint); }
+  .foot-row{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; align-items:center; }
+  footer a{ color:var(--text-soft); text-decoration:none; }
+  footer a:hover{ color:var(--text); }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header class="site">
+  <div class="nav-row">
+    <a class="logo" href="#top"><span class="lm">media</span><span class="lw">whop</span></a>
+    <nav class="links">
+      <a href="#problems">the leak</a>
+      <a href="#approach">approach</a>
+      <a href="#process">process</a>
+      <a href="#get">what you get</a>
+      <a href="#beyond">beyond ads</a>
+    </nav>
+    <a class="btn btn-solid btn-glow nav-cta" href="#contact">book an audit</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero" style="border-top:none; padding-top:56px;">
+    <canvas id="particles"></canvas>
+    <div class="wrap hero-grid">
+      <div>
+        <span class="hero-badge"><span class="dot"></span> end-to-end google ads management</span>
+        <h1>Most Google Ads accounts leak money quietly.</h1>
+        <p class="sub">Agencies love to report clicks and impressions. We open the books — search terms, wasted spend, and the exact line items costing you revenue — then fix them, together with you.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-solid btn-glow" href="#contact">book a free audit</a>
+          <a class="btn btn-ghost btn-glow" href="#process">see how we work</a>
+        </div>
+        <p class="hero-tagline">global strategy · insider expertise · human partnership</p>
+      </div>
+
+      <div>
+        <div class="receipt">
+          <div class="receipt-head">
+            <span class="label">your account, decoded</span>
+            <span class="label">estimate</span>
+          </div>
+
+          <div class="receipt-row">
+            <span class="r-label">monthly ad spend</span>
+            <div class="spend-edit">
+              <span>$</span>
+              <input id="spendInput" type="number" min="500" max="500000" step="100" value="10000" aria-label="Monthly ad spend in dollars">
+            </div>
+          </div>
+          <div class="receipt-row" style="border-bottom:1px dashed var(--border); padding-top:2px; padding-bottom:16px;">
+            <div class="spend-input-row" style="width:100%;">
+              <input id="spendRange" type="range" min="500" max="100000" step="100" value="10000" aria-label="Adjust monthly ad spend">
+            </div>
+          </div>
+
+          <div class="receipt-row waste">
+            <span class="r-label">lost to non-converting clicks*</span>
+            <span class="r-value" id="wasteValue">-$3,600</span>
+          </div>
+          <div class="receipt-row recovered">
+            <span class="r-label">recoverable with real management</span>
+            <span class="r-value" id="recoveredValue">$3,600</span>
+          </div>
+
+          <p class="receipt-foot">*Based on the average ~36% of spend lost to non-converting clicks across typical Google Ads accounts. Your number depends on your account — we'll show you the real one in an audit.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEMS -->
+  <section id="problems">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>The real cost of broken agency models</h2>
+        <p class="desc">Four line items most agencies would rather you never see.</p>
+      </div>
+
+      <div class="ledger">
+        <div class="ledger-row reveal">
+          <span class="stamp">waste</span>
+          <div>
+            <h3>Wasted ad spend</h3>
+            <p>The average Google Ads account wastes about 36¢ of every dollar on clicks that were never going to convert. Most agencies never surface this.</p>
+          </div>
+          <span class="ledger-stat">~36% of spend</span>
+        </div>
+
+        <div class="ledger-row reveal">
+          <span class="stamp">noise</span>
+          <div>
+            <h3>Vanity metrics theater</h3>
+            <p>Reports full of impressions and clicks, while pipeline, CAC, and revenue — the numbers that actually matter to your business — stay hidden.</p>
+          </div>
+          <span class="ledger-stat">clicks ≠ revenue</span>
+        </div>
+
+        <div class="ledger-row reveal">
+          <span class="stamp">churn</span>
+          <div>
+            <h3>Junior staff, high turnover</h3>
+            <p>Senior talent pitches the account. Junior associates juggling multiple accounts run the actual day-to-day.</p>
+          </div>
+          <span class="ledger-stat">multiple accounts / rep</span>
+        </div>
+
+        <div class="ledger-row reveal">
+          <span class="stamp">locked</span>
+          <div>
+            <h3>No real transparency</h3>
+            <p>Limited account access, opaque recommendations, and little visibility into search terms or conversion quality.</p>
+          </div>
+          <span class="ledger-stat">admin access: denied</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY MEDIAWHOP -->
+  <section id="approach">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Why mediawhop exists</h2>
+        <p class="desc">We built mediawhop to deliver expert hands-on management, full transparency, and a true strategic partnership.</p>
+      </div>
+
+      <div class="pillars">
+        <div class="pillar reveal">
+          <svg class="icon" viewBox="0 0 48 48" fill="none"><path d="M42 24.5c0-1.4-.1-2.7-.4-4H24v7.6h10.1c-.4 2.4-1.8 4.4-3.8 5.8v4.8h6.2c3.6-3.3 5.5-8.2 5.5-14.2z" fill="#4285F4"/><path d="M24 43c5.1 0 9.4-1.7 12.5-4.6l-6.2-4.8c-1.7 1.1-3.9 1.8-6.3 1.8-4.9 0-9-3.3-10.4-7.7H7.2v4.9C10.3 38.9 16.6 43 24 43z" fill="#34A853"/><path d="M13.6 27.7c-.4-1.1-.6-2.3-.6-3.7s.2-2.6.6-3.7v-4.9H7.2C5.8 18.2 5 21 5 24s.8 5.8 2.2 8.6l6.4-4.9z" fill="#FBBC05"/><path d="M24 12.6c2.8 0 5.3.9 7.2 2.8l5.4-5.4C33.4 6.9 29.1 5 24 5 16.6 5 10.3 9.1 7.2 15.4l6.4 4.9c1.4-4.4 5.5-7.7 10.4-7.7z" fill="#EA4335"/></svg>
+          <h3>Insider knowledge</h3>
+          <p>Ex-Google specialists with 5–10 years of direct platform experience. We know how the algorithm actually behaves.</p>
+        </div>
+        <div class="pillar reveal">
+          <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="#4285F4" stroke-width="1.6"><circle cx="24" cy="24" r="18"/><ellipse cx="24" cy="24" rx="8" ry="18"/><path d="M6 24h36M8.5 15h31M8.5 33h31"/></svg>
+          <h3>Strategy + precision</h3>
+          <p>US-based strategic leadership paired with a world-class execution team. Founder-level attention plus technical excellence.</p>
+        </div>
+        <div class="pillar reveal">
+          <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="#34A853" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20l7-7h8l4 4M42 20l-7-7h-8l-4 4"/><path d="M13 13v9l-6 6a4 4 0 005.7 5.7L19 27M35 13v9l6 6a4 4 0 01-5.7 5.7L29 27"/><path d="M19 27h10"/></svg>
+          <h3>Human partnership</h3>
+          <p>No black-box reports. Direct access to the experts running your campaigns and the decisions tied to your goals.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW WE WORK -->
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>How we work with you</h2>
+        <p class="desc">Two people you can actually reach — not a ticket queue.</p>
+      </div>
+
+      <div class="work-grid">
+        <div class="work-card reveal">
+          <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="#4285F4" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="15" r="7"/><path d="M9 41c0-8.3 6.7-15 15-15s15 6.7 15 15"/></svg>
+          <h3 class="blue">Your dedicated strategist</h3>
+          <p>A founder-level point of contact who deeply understands your business, margins, and growth goals.</p>
+          <p>We hunt opportunities, challenge assumptions, and keep every decision aligned with what actually moves your bottom line.</p>
+        </div>
+        <div class="work-card reveal">
+          <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="#34A853" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="19" r="8"/><path d="M13 19h12M19 13v12"/><circle cx="33" cy="31" r="6"/><path d="M29 31h8M33 27v8"/></svg>
+          <h3 class="green">Elite execution team</h3>
+          <p>Ex-Google architects with 5–10 years of internal platform experience.</p>
+          <p>They build rigorous account structures, protect your budget with continuous search-term hygiene, and optimize for real business outcomes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section id="process">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Our proven process</h2>
+        <p class="desc">Four stages, repeated every quarter — not a one-time setup.</p>
+      </div>
+
+      <div class="process" id="processTimeline">
+        <div class="process-line"><div class="process-line-fill" id="processFill"></div></div>
+        <div class="step reveal"><span class="num">01</span><h3>Discovery</h3><p>Deep dive into your goals, unit economics, audience, and competitive landscape so strategy starts from truth.</p></div>
+        <div class="step reveal"><span class="num">02</span><h3>Technical audit</h3><p>Full account and tracking review. We surface wasted spend, broken conversion paths, and structural issues.</p></div>
+        <div class="step reveal"><span class="num">03</span><h3>Strategy &amp; build</h3><p>Custom architecture, tight keyword and audience frameworks, and measurement tied to metrics that matter.</p></div>
+        <div class="step reveal"><span class="num">04</span><h3>Optimize &amp; scale</h3><p>Proactive ongoing management, continuous testing, and strategy sessions focused on profitable growth.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT YOU GET -->
+  <section id="get">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>What you actually get</h2>
+        <p class="desc">Six things most agency contracts leave out.</p>
+      </div>
+
+      <div class="get-grid">
+        <div class="get-item reveal"><span class="check">✓</span><div><h3>Full account transparency</h3><p>Admin access from day one. Clear reporting tied to pipeline, revenue, and CAC — not vanity metrics.</p></div></div>
+        <div class="get-item reveal"><span class="check">✓</span><div><h3>Search term discipline</h3><p>Ongoing query mining and negative keyword protection so your budget only funds relevant intent.</p></div></div>
+        <div class="get-item reveal"><span class="check">✓</span><div><h3>Conversion tracking accuracy</h3><p>Proper conversion tracking and measurement setup so the algorithm optimizes to real outcomes.</p></div></div>
+        <div class="get-item reveal"><span class="check">✓</span><div><h3>Full campaign-type coverage</h3><p>Search, Shopping, Display, and Performance Max managed as one coherent account strategy — not a single-channel silo.</p></div></div>
+        <div class="get-item reveal"><span class="check">✓</span><div><h3>Budget &amp; bid strategy management</h3><p>Structured account architecture and bid strategy oversight so spend flows to what's actually converting.</p></div></div>
+        <div class="get-item reveal"><span class="check">✓</span><div><h3>Direct expert access</h3><p>Talk to the people actually managing your account. No account-manager telephone game.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BEYOND ADS -->
+  <section id="beyond" class="beyond-band">
+    <div class="wrap">
+      <div class="section-head reveal" style="margin-bottom:0;">
+        <h2>Beyond Google Ads — full-funnel support</h2>
+        <p class="desc">Elite Google Ads is our core. When your growth needs more, dedicated social media and web development teams collaborate on demand.</p>
+      </div>
+
+      <div class="beyond-grid">
+        <div class="beyond-item reveal">
+          <svg class="icon" viewBox="0 0 48 48" fill="#34A853"><path d="M26 4L10 27h10l-4 17 18-25H24z"/></svg>
+          <h3>Specialized teams</h3>
+          <p>Independent social and web squads that stay sharp in their craft and plug in only when your project requires them.</p>
+        </div>
+        <div class="beyond-item reveal">
+          <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="#34A853" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h20a4 4 0 014 4v10a4 4 0 01-4 4H16l-8 6V12z"/><path d="M40 18a4 4 0 014 4v10a4 4 0 01-4 4h-2l4 5v-5" opacity="0.55"/></svg>
+          <h3>Cohesive campaigns</h3>
+          <p>Message and creative consistency across search, social, and site experience so every touchpoint reinforces the next.</p>
+        </div>
+        <div class="beyond-item reveal">
+          <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="#4285F4" stroke-width="1.6"><circle cx="24" cy="24" r="18"/><ellipse cx="24" cy="24" rx="8" ry="18"/><path d="M6 24h36M8.5 15h31M8.5 33h31"/></svg>
+          <h3>One partner, full coverage</h3>
+          <p>From paid search and Performance Max to retargeting, social amplification, and conversion-focused web work.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section id="contact" class="final">
+    <div class="final-glow"></div>
+    <div class="wrap">
+      <h2 class="reveal">Let's grow together.</h2>
+      <p class="reveal">Ready for Google Ads management that prioritizes your revenue, not just platform metrics? Send us your account — we'll show you exactly where it's leaking.</p>
+      <div class="final-ctas reveal">
+        <a class="btn btn-solid btn-glow" href="mailto:hello@mediawhop.com?subject=Free%20Google%20Ads%20Audit">book a free audit</a>
+        <a class="btn btn-ghost btn-glow" href="mailto:hello@mediawhop.com">email hello@mediawhop.com</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot-row">
+    <a class="logo" style="font-size:1.05rem;" href="#top"><span class="lm">media</span><span class="lw">whop</span></a>
+    <span><a href="mailto:hello@mediawhop.com">hello@mediawhop.com</a> · <a href="https://www.mediawhop.com">www.mediawhop.com</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- scroll progress ---------- */
+  var progress = document.getElementById('progress');
+  function updateProgress(){
+    var h = document.documentElement;
+    var scrolled = h.scrollTop;
+    var max = h.scrollHeight - h.clientHeight;
+    progress.style.width = (max > 0 ? (scrolled / max) * 100 : 0) + '%';
+  }
+  document.addEventListener('scroll', function(){ requestAnimationFrame(updateProgress); }, { passive:true });
+  updateProgress();
+
+  /* ---------- reveal on scroll ---------- */
+  var revealEls = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window && !reduceMotion){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry, i){
+        if(entry.isIntersecting){
+          entry.target.style.transitionDelay = (i % 6) * 60 + 'ms';
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold:0.12, rootMargin:'0px 0px -6% 0px' });
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('in-view'); });
+  }
+
+  /* ---------- process timeline draw ---------- */
+  var fill = document.getElementById('processFill');
+  var timeline = document.getElementById('processTimeline');
+  if(timeline){
+    var lineIo = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          fill.style.width = '100%';
+          lineIo.unobserve(entry.target);
+        }
+      });
+    }, { threshold:0.3 });
+    lineIo.observe(timeline);
+  }
+
+  /* ---------- nav active link ---------- */
+  var navLinks = document.querySelectorAll('nav.links a');
+  var sections = Array.prototype.slice.call(navLinks).map(function(a){
+    return document.querySelector(a.getAttribute('href'));
+  }).filter(Boolean);
+  if(sections.length && 'IntersectionObserver' in window){
+    var navIo = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var id = '#' + entry.target.id;
+        var link = document.querySelector('nav.links a[href="' + id + '"]');
+        if(!link) return;
+        if(entry.isIntersecting){ link.classList.add('active'); }
+        else { link.classList.remove('active'); }
+      });
+    }, { rootMargin:'-40% 0px -50% 0px' });
+    sections.forEach(function(s){ navIo.observe(s); });
+  }
+
+  /* ---------- magnetic glow buttons ---------- */
+  document.querySelectorAll('.btn-glow').forEach(function(btn){
+    btn.addEventListener('mousemove', function(e){
+      var r = btn.getBoundingClientRect();
+      btn.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+      btn.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+    });
+  });
+
+  /* ---------- animated calculator ---------- */
+  var input = document.getElementById('spendInput');
+  var range = document.getElementById('spendRange');
+  var wasteEl = document.getElementById('wasteValue');
+  var recoveredEl = document.getElementById('recoveredValue');
+  var WASTE_RATE = 0.36;
+  var currentWaste = parseFloat(input.value) * WASTE_RATE;
+  var animFrame = null;
+
+  function fmt(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
+
+  function renderValues(waste){
+    wasteEl.textContent = '-' + fmt(waste);
+    recoveredEl.textContent = fmt(waste);
+  }
+
+  function animateTo(target){
+    if(reduceMotion){ currentWaste = target; renderValues(currentWaste); return; }
+    if(animFrame) cancelAnimationFrame(animFrame);
+    var start = currentWaste;
+    var t0 = performance.now();
+    var duration = 400;
+    function step(now){
+      var p = Math.min(1, (now - t0) / duration);
+      var eased = 1 - Math.pow(1 - p, 3);
+      currentWaste = start + (target - start) * eased;
+      renderValues(currentWaste);
+      if(p < 1){ animFrame = requestAnimationFrame(step); }
+      else { currentWaste = target; }
+    }
+    animFrame = requestAnimationFrame(step);
+  }
+
+  function update(spend){
+    spend = Math.max(0, spend || 0);
+    animateTo(spend * WASTE_RATE);
+  }
+
+  input.addEventListener('input', function(){
+    var v = parseFloat(input.value) || 0;
+    if (v <= range.max) range.value = v;
+    update(v);
+  });
+  range.addEventListener('input', function(){
+    input.value = range.value;
+    update(parseFloat(range.value));
+  });
+  renderValues(currentWaste);
+
+  /* ---------- particle network (hero) ---------- */
+  var canvas = document.getElementById('particles');
+  var hero = canvas.closest('.hero');
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+  var mouse = { x:null, y:null, active:false };
+  var W, H, DPR;
+
+  function resize(){
+    var rect = hero.getBoundingClientRect();
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = rect.width; H = rect.height;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    var count = Math.min(70, Math.round((W * H) / 16000));
+    particles = [];
+    for(var i=0;i<count;i++){
+      particles.push({
+        x: Math.random()*W, y: Math.random()*H,
+        vx: (Math.random()-0.5) * 0.25, vy: (Math.random()-0.5) * 0.25,
+        r: Math.random()*1.6 + 0.6,
+        c: Math.random() > 0.5 ? '66,133,244' : '52,168,83'
+      });
+    }
+  }
+
+  function drawStatic(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    particles.forEach(function(p){
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+    });
+  }
+
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<particles.length;i++){
+      var p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      if(mouse.active){
+        var dx = p.x - mouse.x, dy = p.y - mouse.y;
+        var dist = Math.sqrt(dx*dx+dy*dy);
+        if(dist < 110){
+          var force = (110 - dist) / 110;
+          p.x += (dx/dist) * force * 1.2;
+          p.y += (dy/dist) * force * 1.2;
+        }
+      }
+      if(p.x < 0) p.x = W; if(p.x > W) p.x = 0;
+      if(p.y < 0) p.y = H; if(p.y > H) p.y = 0;
+
+      for(var j=i+1;j<particles.length;j++){
+        var q = particles[j];
+        var ddx = p.x-q.x, ddy = p.y-q.y;
+        var d = Math.sqrt(ddx*ddx+ddy*ddy);
+        if(d < 130){
+          ctx.strokeStyle = 'rgba(140,160,200,' + (0.14 * (1 - d/130)) + ')';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke();
+        }
+      }
+    }
+    particles.forEach(function(p){
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(' + p.c + ',0.65)';
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fill();
+    });
+    requestAnimationFrame(tick);
+  }
+
+  resize();
+  if(reduceMotion){
+    drawStatic();
+  } else {
+    tick();
+    window.addEventListener('resize', function(){ resize(); });
+    hero.addEventListener('mousemove', function(e){
+      var r = hero.getBoundingClientRect();
+      mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; mouse.active = true;
+    });
+    hero.addEventListener('mouseleave', function(){ mouse.active = false; });
+  }
+})();
+</script>
+
+</body>
+</html>
