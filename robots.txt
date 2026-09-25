@@ -1,0 +1,11 @@
+# Allow all search engines to crawl our marketing site
+User-agent: *
+Allow: /
+
+# Prevent search engines from crawling backend node files or system configurations
+Disallow: /node_modules/
+Disallow: /package.json
+Disallow: /package-lock.json
+
+# Explicitly tell all global search bots where your validated map lives
+Sitemap: https://mediawhop.com
